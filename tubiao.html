@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="echarts.js"></script>
+    <title>可视化图表</title>
+</head>
+<body>
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+ 
+        var option = {
+            title: {
+                text: '签到人数随时间变化图'
+            },
+            tooltip: {},
+            legend: {
+                data:[{
+                    name:'人数'
+                }]
+            },
+            xAxis: {
+                data: ["时间1","时间2","时间3","时间4","时间5","时间6"]
+            },
+            yAxis: {},
+            series: [{
+                name: '人数',
+                type: 'line',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+ 
+        myChart.setOption(option);
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>签到信息界面</title>
+    <style>
+        input[type="text"] {
+            width: 150px;
+            height: 30px;
+        }
+    </style>
+    <style>
+        .one {
+            margin: 0 30px 0 0;
+        }
+    </style>
+    <style>
+        .div {
+            margin: 0 0 50px 0;
+        }
+    </style>
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+        }
+
+        a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .previous {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .next {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+    </style>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="base64.js"></script>
+    <script src="tableExport.js"></script>
+    <script>
+        $(function () {
+            var url = decodeURI(location.search);
+            var object = {};
+            if (url.indexOf("?") != -1)
+            {
+                var canshu = url.substr(1); 
+                var canshus = canshu.split("&");
+                for (var i = 0; i < canshus.length; i++) {
+                    object[canshus[i].split("=")[0]] = canshus[i].split("=")[1]
+                }
+            }
+            $.ajax({
+                type: "get",
+                url: "http://10.21.234.24:8080/api/checkin/List",
+                // url: "http://localhost:8080/api/checkin/List",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: {
+                    "setId": object["setId"]
+                },
+                success: function (result) {
+                    console.log(result);
+                    var str = "";
+                    var zhuangtai="";
+                    var huanjie="";
+                    var kejian="";
+                    for (var x in result.data) {
+                        switch(result.data[x].status){
+                            case 0 : zhuangtai = "未开始";
+                            break; 
+                            case 1 : zhuangtai = "进行中";
+                            break; 
+                            case 2 : zhuangtai = "已结束";
+                            break;
+                            default:
+                        }
+                        switch(result.data[x].type){
+                            case 1 : huanjie = "签到";
+                            break; 
+                            case 2 : huanjie = "签退";
+                            break; 
+                            case 3 : huanjie = "签到+签退";
+                            break;
+                            default:
+                        }
+                        switch(result.data[x].visible){
+                            case 0 : kejian = "不可见";
+                            break; 
+                            case 1 : kejian = "可见";
+                            break;
+                            default:
+                        }
+                        str += "<tr>" +
+                            " <td width='700' height='30' align='center' >" + result.data[x].id + "</td>" +
+                            " <td width='700' height='30' align='center' >" + result.data[x].startTime + "</td>" +
+                            " <td width='700' height='30' align='center' >" + result.data[x].endTime + "</td>" +
+                            " <td width='700' height='30' align='center' >" + zhuangtai + "</td>" +
+                            " <td width='700' height='30' align='center' >" + huanjie + "</td>" +
+                            " <td width='700' height='30' align='center' >" + kejian + "</td>" +
+                            " <td width='700' height='30' align='center' ><a href='sign.html?checkid=" + result.data[x].id + "&setId="+object["setId"]+"'>查看详细</a></td>" +
+                            "</tr>";
+                    }
+                    $("#TBA1").html(str);
+                    var lujing="<a href=checkset.html><button style='width: 100px;height: 50px;'>返回</button></a>"
+                    $("#sp1").html(lujing);
+                },
+                error: function (e) {
+                    console.log(e)
+                }
+            });
+            $("#sb1").click(function () {
+                $("#tables").tableExport({type:"excel",escape:"false"});
+            });
+        });
+    </script>
+</head>
+
+<body background="checkin_bg.jpg">
+    <div class="div">
+        <table id="tables" border="1px" align="center" cellpadding="1" cellspacing="0">
+            <tr bgcolor="#4169E1">
+                <td width="700" height="30" align="center" style="color: white;">签到id</td>
+                <td width="700" height="30" align="center" style="color: white;">开始时间</td>
+                <td width="700" height="30" align="center" style="color: white;">结束时间</td>
+                <td width="700" height="30" align="center" style="color: white;">签到状态（未开始/进行中/已结束）</td>
+                <td width="700" height="30" align="center" style="color: white;">签到环节（签到、签退）</td>
+                <td width="700" height="30" align="center" style="color: white;">是否可见</td>
+                <td width="700" height="30" align="center" style="color: white;">查看详细</td>
+            </tr>
+            <tbody id="TBA1"></tbody>
+
+        </table>
+    </div>
+    <div class="div" align="center">
+        <span id="sp1"></span>
+        <span>
+            <input id="sb1" type="submit" name="tz" style="width: 100px;height: 50px;" value="导出签到结果">
+        </span>
+    </div>
+
+</body>
+
+</html>

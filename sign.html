@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人签到信息界面</title>
+    <style>
+        input[type="text"] {
+            width: 150px;
+            height: 30px;
+        }
+    </style>
+    <style>
+        .one {
+            margin: 0 30px 0 0;
+        }
+    </style>
+    <style>
+        .div {
+            margin: 0 0 50px 0;
+        }
+    </style>
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+        }
+
+        a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .previous {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .next {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+    </style>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="base64.js"></script>
+    <script src="tableExport.js"></script>
+    <script>
+        $(function () {
+            var url = decodeURI(location.search);
+            var object = {};
+            if (url.indexOf("?") != -1)
+            {
+                var canshu = url.substr(1); 
+                var canshus = canshu.split("&"); 
+                for (var i = 0; i < canshus.length; i++) {
+                    object[canshus[i].split("=")[0]] = canshus[i].split("=")[1]
+                }
+            }
+            $.ajax({
+                type: "get",
+                headers:{
+                    "Token":""
+                },
+                url: "http://10.21.234.24:8080/api/Sign/Information",
+                // url: "http://localhost:8080/api/Sign/Information",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: {
+                    "checkId": object["checkid"]
+                },
+                success: function (result) {
+                    console.log(result);
+                    var str = "";
+                    for (var x in result.data) {
+                        str += "<tr>" +
+                            " <td width='700' height='30' align='center' >" + result.data[x].nick + "</td>" +
+                            " <td width='700' height='30' align='center' >" + result.data[x].signTime + "</td>" +
+                            "</tr>";
+                    }
+                    $("#TBA1").html(str);
+                    var lujing="<a href=checkin.html?setId="+object["setId"]+"><button style='width: 100px;height: 50px;'>返回</button></a>"
+                    $("#sp1").html(lujing);
+                },
+                error: function (e) {
+                    console.log(e)
+                }
+            });
+            $("#sb1").click(function () {
+                $("#tables").tableExport({ type: "excel", escape: "false" });
+            });
+        });
+    </script>
+</head>
+
+<body background="checkin_bg.jpg">
+    <div class="div">
+        <table id="tables" border="1px" align="center" cellpadding="1" cellspacing="0">
+            <tr bgcolor="#4169E1">
+                <td width="700" height="30" align="center" style="color: white;">学生名</td>
+                <td width="700" height="30" align="center" style="color: white;">签到时间</td>
+            </tr>
+            <tbody id="TBA1"></tbody>
+
+        </table>
+    </div>
+    <div class="div" align="center">
+        <span id="sp1"></span>
+        <span>
+            <input id="sb1" type="submit" name="tz" style="width: 100px;height: 50px;" value="导出签到结果">
+        </span>
+    </div>
+
+</body>
+
+</html>

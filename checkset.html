@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+input[type="text"]
+{
+ width: 150px;
+ height: 30px;
+}
+</style>
+<style>
+   .one{
+      margin: 0 30px 0 0;
+   }
+</style>
+<style>
+   .div{
+      margin:0 0 50px 0;
+   }
+</style>
+<style>
+   a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+
+a:hover {
+    background-color: #ddd;
+    color: black;
+}
+.previous {
+    background-color: #55b9ca;
+    color: white;
+}
+
+.next {
+    background-color: #55b9ca;
+    color: white;
+}
+.round {
+    border-radius: 50%;
+}
+</style>
+</head>
+
+<script  src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js">
+
+</script>
+
+<body >
+   <div align="center" class="div">
+    <form >
+    <span style="text-align: left;text-indent: 0.4em;"><label>学院</label></span>
+    <span class="one"><input type="text" name="college" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>班级</label></span>
+    <span class="one"><input type="text" name="banji" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>发起人</label></span>
+    <span class="one"><input type="text" name="sponsor" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>排序方式</label></span>
+    <span class="one"><select type="select" name="pick" class="textbox"><option  value="up">升序</option><option value="down">降序</option></select></span>
+    <span class="one"><input type="submit" id="check" name="find" class="submit" value="查询" style='background-color:deepskyblue'></span>
+</form>
+   </div>
+   <div class="div"> 
+      <table id="ta" border="1px" align="center"  cellpadding="1" cellspacing="0">
+         <tr bgcolor="#00BFFF">
+            <td width="700" height="30">签到ID</td>
+            <td width="700" height="30">签到活动名</td>
+            <td width="700" height="30">发起人ID</td>
+            <td width="700" height="30">可见性</td>
+            <td width="700" height="30">查看信息</td>
+         </tr>
+          <tbody id="result"></tbody>
+      </table>
+</div>
+<div class="div" align="center">
+      <span><a href="#" class="previous round" >&#8249;</a></span>
+      <span>
+          <input type="text" name="number" style="width: 20px;height: 20px;">
+          <input type="submit" name="tz" value="跳转" >     
+      </span>
+      <span style="text-align: right;text-indent: 0.4em;"><label>共100页</label></span>
+      <span><a href="#" class="next round" >&#8250;</a></span>
+      <span style="text-align: right;text-indent: 0.4em;"><label>本页最多显示15条签到信息</label></span>
+   </div>
+</body>
+<script>
+        $(function(){
+        		$.ajax({
+        	        type: "get",
+        	        url: "http://10.21.234.24:8080/api/checkSet/findByUserId",
+        	        dataType: "json",
+        	        contentType: "application/json;charset=utf-8",
+        	        data: {
+        	        	"userId": 1
+        	        },
+        	        success: function (result) {
+        	            console.log(result);
+        	          var str="";
+                     var kejian="";
+        	            for(var x in result.data){
+                        switch(result.data[x].visible){
+                            case 0 : kejian = "不可见";
+                            break; 
+                            case 1 : kejian = "可见";
+                            break;
+                            default:
+                        }
+        	           	 str +=  "<tr>" +
+        	               "<td  width='700' height='30' align='center'>"+result.data[x].id+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data[x].nick+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data[x].userId+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+kejian+"</td>"+
+          	               "<td  width='700' height='30' align='center'><a href='checkin.html?setId="+result.data[x].id+"'>查看</a></td>"+
+        	            "</tr>";
+        	            }
+        	            $("#result").html(str);
+        	        },
+        	        error: function (e) {
+        	        	 alert("查询失败");
+        	        }
+  });
+        });
+       
+</script>
+
+</html>
