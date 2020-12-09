@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="echarts.js"></script>
+    <title>可视化图表</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="main" style="width: 600px;height:400px;" align="center"></div>
+    <script>
+        $(function () {
+            var url = decodeURI(location.search);
+            var object = {};
+            if (url.indexOf("?") != -1) {
+                var canshu = url.substr(1);
+                var canshus = canshu.split("&");
+                for (var i = 0; i < canshus.length; i++) {
+                    object[canshus[i].split("=")[0]] = canshus[i].split("=")[1]
+                }
+            }
+            var token = localStorage.getItem("Token");
+            $.ajax({
+                type: "get",
+                headers:{
+                    "Token":token
+                },
+                url: "http://10.21.234.24:8080/api/checkin",
+                // url: "http://localhost:8080/api/checkin",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: {
+                    "checkId": object["checkid"]
+                },
+                success: function (result) {
+                    console.log(result);
+                    var starttime = new Date(result.data.startTime);
+                    var endtime=new Date(result.data.endTime);
+                    var ctime=(endtime.getTime()-starttime.getTime());
+                    var stime = new Array();
+                    for(var t = 0;t<6;t++){
+                        stime[t]=(ctime*(t+1)/6).toFixed(2)+"毫秒";
+                    }
+                    $.ajax({
+                type: "get",
+                headers: {
+                    "Token": token
+                },
+                url: "http://10.21.234.24:8080/api/Sign/Information",
+                // url: "http://localhost:8080/api/Sign/Information",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: {
+                    "checkId": object["checkid"]
+                },
+                success: function (result) {
+                    console.log(result);
+                    var y = 0;
+                    var snumber = new Array(0,0,0,0,0,0);
+                    for (var x in result.data) {
+                        var losttime=new Date(result.data[x].signTime);
+                        if(losttime.getTime()-starttime.getTime()>=ctime*(y+1)/6){
+                            y++;
+                        }
+                        snumber[y]++;
+                    }
+                    var lujing = "<a href=sign.html?checkid=" + object["checkid"] + "&setId=" + object["setId"] + "><button style='width: 100px;height: 50px;'>返回</button></a>"
+                    $("#sp1").html(lujing);
+
+                    var myChart = echarts.init(document.getElementById('main'));
+
+                    var option = {
+                        title: {
+                            text: '签到人数随时间变化图'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: [{
+                                name: '人数'
+                            }]
+                        },
+                        xAxis: {
+                            data: [stime[0], stime[1],stime[2],stime[3],stime[4],stime[5]]
+                        },
+                        yAxis: {},
+                        series: [{
+                            name: '人数',
+                            type: 'line',
+                            data: [snumber[0], snumber[1], snumber[2], snumber[3], snumber[4], snumber[5]]
+                        }]
+                    };
+
+                    myChart.setOption(option);
+                },
+                error: function (e) {
+                    console.log(e)
+                }
+            });
+                },
+                error: function (e) {
+                    console.log(e)
+                }
+            });
+        });
+    </script>
+    <div class="div" align="center">
+        <span id="sp1"></span>
+    </div>
+</body>
+
+</html>

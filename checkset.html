@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+input[type="text"]
+{
+ width: 150px;
+ height: 30px;
+}
+</style>
+<style>
+   .one{
+      margin: 0 30px 0 0;
+   }
+</style>
+<style>
+   .div{
+      margin:0 0 50px 0;
+   }
+</style>
+<style>
+   a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+
+a:hover {
+    background-color: #ddd;
+    color: black;
+}
+.previous {
+    background-color: #55b9ca;
+    color: white;
+}
+
+.next {
+    background-color: #55b9ca;
+    color: white;
+}
+.round {
+    border-radius: 50%;
+}
+</style>
+</head>
+
+<script  src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js">
+
+</script>
+
+<body >
+   <div align="center" class="div">
+    <form name="search" id="search" method="get" >
+    <span style="text-align: left;text-indent: 0.4em;"><label>签到ID</label></span>
+    <span class="one"><input type="text" name="id" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>签到活动名</label></span>
+    <span class="one"><input type="text" name="nick" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>发起人ID</label></span>
+    <span class="one"><input type="text" name="userId" class="textbox" style="border:1px #63c0eb solid;"></span>
+    <span style="text-align: left;text-indent: 0.4em;"><label>排序方式</label></span>
+    <span class="one"><select type="select" name="pick" class="textbox"><option  value="up">升序</option><option value="down">降序</option></select></span>
+    <span class="one"><input type="button" id="check" name="find" class="submit" value="查询" style='background-color:deepskyblue' onclick="searchpage(document.search);"></span>
+</form>
+   </div>
+   <div class="div"> 
+      <table id="ta" border="1px" align="center"  cellpadding="1" cellspacing="0">
+         <tr bgcolor="#00BFFF">
+            <td width="700" height="30">签到ID</td>
+            <td width="700" height="30">签到活动名</td>
+            <td width="700" height="30">发起人ID</td>
+            <td width="700" height="30">可见性</td>
+            <td width="700" height="30">查看信息</td>
+         </tr>
+          <tbody id="result"></tbody>
+      </table>
+</div>
+<!--显示分页信息-->
+<div class="div" align="center">
+    <form name="page" method="get" id="page">
+      <span><input type="button" class="previous round" value="上一页">&#8249;</a></span>
+      <span>
+          <input type="text" name="current" id="current" style="width: 20px;height: 20px;">
+          <input type="button" name="tz" value="跳转" onclick="pagetz(document.page);">    
+      </span>
+      <span id="pageNum" style="text-align: right;text-indent: 0.4em;"><td>共[ ]页[ ]条记录</td></span>
+      <span><a href="#" class="next round" >&#8250;</a></span>
+      <span style="text-align: right;text-indent: 0.4em;"><label>本页最多显示2条签到信息</label></span>
+    </form>
+   </div>
+</body>
+<script>
+    function pagetz(obj){
+        var token=localStorage.getItem("Token");
+        		$.ajax({
+        	        type: "get",
+                    headers:{
+                    "Token":token
+                    },
+        	        url: "http://10.21.234.24:8080/api/checkSet/findByNick/PageHelper",
+        	        dataType: "json",
+        	        contentType: "application/json;charset=utf-8",
+        	        data:{
+                        "nick":NICK,
+                        "current":obj.current.value,
+                        "pageSize":2,
+                        "sorter":"nick asc,user_id desc"
+        	        },
+        	        success: function (result) {
+        	            console.log(result);
+        	          var str="";
+                     var kejian="";
+        	            for(var x in result.data.list){
+                        switch(result.data.list[x].visible){
+                            case 0 : kejian = "不可见";
+                            break; 
+                            case 1 : kejian = "可见";
+                            break;
+                            default:
+                        }
+        	           	 str +=  "<tr>" +
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].id+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].nick+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].userId+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+kejian+"</td>"+
+          	               "<td  width='700' height='30' align='center'><a href='checkin.html?setId="+result.data.list[x].id+"'>查看</a></td>"+
+        	            "</tr>";
+        	            }
+        	            $("#result").html(str);
+                        $("#pageNum").html("共"+result.data.pages+"页"+result.data.total+"记录");
+        	        },
+        	        error: function (e) {
+        	        	 alert("查询失败");
+        	        }
+  });
+    }
+</script>
+<script>
+    var NICK=0;
+    function searchpage(obj){
+        var token=localStorage.getItem("Token");
+        if(obj.nick.value!=''){
+            $.ajax({
+        	        type: "get",
+                    headers:{
+                    "Token":token
+                    },
+        	        url: "http://10.21.234.24:8080/api/checkSet/findByNick/PageHelper",
+        	        dataType: "json",
+        	        contentType: "application/json;charset=utf-8",
+        	        data:{
+        	        	"nick": obj.nick.value,
+                        "current":1,
+                        "pageSize":2,
+                        "sorter":"nick asc,user_id desc"
+        	        },
+        	        success: function (result) {
+        	            console.log(result);
+                        if(result.data.list==0)
+                        {
+		                 alert('不存在该签到名！');
+		                return false;
+	                      }
+                          NICK=obj.nick.value;
+        	          var str="";
+                     var kejian="";
+        	            for(var x in result.data.list){
+                        switch(result.data.list[x].visible){
+                            case 0 : kejian = "不可见";
+                            break; 
+                            case 1 : kejian = "可见";
+                            break;
+                            default:
+                        }
+        	           	 str +=  "<tr>" +
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].id+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].nick+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].userId+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+kejian+"</td>"+
+          	               "<td  width='700' height='30' align='center'><a href='checkin.html?setId="+result.data.list[x].id+"'>查看</a></td>"+
+        	            "</tr>";
+        	            }
+        	            $("#result").html(str);
+                        $("#pageNum").html("共"+result.data.pages+"页"+result.data.total+"记录");
+        	        },
+        	        error: function (e) {
+        	        	 alert("查询失败");
+        	        }
+  });
+        }
+         if(obj.userId.value!=''){
+        		$.ajax({
+        	        type: "get",
+                    headers:{
+                    "Token":token
+                    },
+        	        url: "http://10.21.234.24:8080/api/checkSet/findByUserId/PageHelper",
+        	        dataType: "json",
+        	        contentType: "application/json;charset=utf-8",
+        	        data:{
+                        "current":1,
+                        "pageSize":2,
+                        "sorter":"nick asc,user_id desc"
+        	        },
+        	        success: function (result) {
+        	            console.log(result);
+                        if(result.data.list==0)
+	              {
+		            alert('不存在该用户ID！');
+		              return false;
+	                  }
+        	          var str="";
+                     var kejian="";
+        	            for(var x in result.data.list){
+                        switch(result.data.list[x].visible){
+                            case 0 : kejian = "不可见";
+                            break; 
+                            case 1 : kejian = "可见";
+                            break;
+                            default:
+                        }
+        	           	 str +=  "<tr>" +
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].id+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].nick+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+result.data.list[x].userId+"</td>"+
+        	               "<td  width='700' height='30' align='center'>"+kejian+"</td>"+
+          	               "<td  width='700' height='30' align='center'><a href='checkin.html?setId="+result.data.list[x].id+"'>查看</a></td>"+
+        	            "</tr>";
+        	            }
+        	            $("#result").html(str);
+                        $("#pageNum").html("共"+result.data.pages+"页"+result.data.total+"记录");
+        	        },
+        	        error: function (e) {
+        	        	 alert("查询失败");
+        	        }
+  });
+        }
+    }
+</script>
+</html>
