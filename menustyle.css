@@ -1,0 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap");
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #7FFFD4;
+}
+body a, html a {
+  text-decoration: none;
+}
+
+.container {
+  text-align: center;
+  margin-top: 50vh;
+}
+.container .menu {
+  cursor: pointer;
+}
+
+.over-lay {
+  position: absolute;
+  right: 0;
+  top: -100%;
+  padding: 3em;
+  width: calc(100% - 6em);
+  height: calc(100% - 6em);
+  transform-origin: top;
+  background: tomato;
+  transition: all .6s ease-in-out;
+}
+.over-lay .cross {
+  float: right;
+  cursor: pointer;
+}
+.over-lay ul {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 50vh;
+}
+.over-lay ul li {
+  list-style: none;
+  opacity: 0;
+  transition: all .5s;
+  font-weight: 700;
+}
+.over-lay ul li a {
+  font-size: 2em;
+  color: black;
+  transition: all .3s;
+}
+.over-lay ul li a:hover {
+  color: Cornsilk;
+}
+.over-lay ul li span {
+  display: block;
+  margin: 10px 0;
+  font-weight: 300;
+  color: white;
+  font-size: 1.2em;
+}
+
+.show {
+  transition: all .6s  ease-in-out;
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  top: 0;
+}
+.show li:nth-of-type(1) {
+  animation: show-list .8s forwards 1s ease-out;
+}
+.show li:nth-of-type(2) {
+  animation: show-list .8s forwards 1.2s ease-out;
+}
+.show li:nth-of-type(3) {
+  animation: show-list .8s forwards 1.4s ease-out;
+}
+.show li:nth-of-type(4) {
+  animation: show-list .8s forwards 1.6s ease-out;
+}
+
+@keyframes show-list {
+  0% {
+    opacity: 0;
+    transform: translateY(200px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
