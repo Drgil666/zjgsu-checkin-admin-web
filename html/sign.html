@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人签到信息界面</title>
+    <style>
+        input[type="text"] {
+            width: 150px;
+            height: 30px;
+        }
+    </style>
+    <style>
+        .one {
+            margin: 0 30px 0 0;
+        }
+    </style>
+    <style>
+        .div {
+            margin: 0 0 50px 0;
+        }
+    </style>
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+        }
+
+        a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .previous {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .next {
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+    </style>
+    <script src="../js/echarts.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="base64.js"></script>
+    <script src="tableExport.js"></script>
+    <link rel="stylesheet" href="../css/c5.css">
+    <script>
+        $(function () {
+            $("#sb1").click(function () {
+                $("#tables").tableExport({type: "excel", escape: "false"});
+            });
+        });
+    </script>
+</head>
+
+<body>
+<div class="div" style="width:800px;float:left;">
+    <table class="dataintable" id="tables" border="1px" align="center" cellpadding="1" cellspacing="0">
+        <tr>
+            <th width="700" height="30" align="center">学生名</th>
+            <th width="700" height="30" align="center">签到时间</th>
+        </tr>
+        <tbody id="TBA1"></tbody>
+
+    </table>
+</div>
+<div id="main" style="width: 600px;height:400px;float:right;" align="center"></div>
+<script>
+    var url0 = "https://zjgsucheckin.top:8443/api/";
+    var url1 = url0 + "checkin";
+    var url2 = url0 + "sign/checkId";
+    $(function () {
+        var url = decodeURI(location.search);
+        var object = {};
+        if (url.indexOf("?") != -1) {
+            var canshu = url.substr(1);
+            var canshus = canshu.split("&");
+            for (var i = 0; i < canshus.length; i++) {
+                object[canshus[i].split("=")[0]] = canshus[i].split("=")[1]
+            }
+        }
+        var token = localStorage.getItem("Token");
+        $.ajax({
+            type: "get",
+            headers: {
+                "Token": token
+            },
+            // url: "http://10.21.234.24:8080/api/checkin",
+            // url: "http://localhost:8080/api/checkin",
+            url: url1,
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: {
+                "checkId": object["checkid"]
+            },
+            success: function (result) {
+                console.log(result);
+                var starttime = new Date(result.data.startTime);
+                var endtime = new Date(result.data.endTime);
+                var ctime = (endtime.getTime() - starttime.getTime());
+                var stime = new Array();
+                for (var t = 0; t < 6; t++) {
+                    stime[t] = (ctime * (t + 1) / 6).toFixed(2) + "毫秒";
+                }
+                $.ajax({
+                    type: "get",
+                    headers: {
+                        "Token": token
+                    },
+                    // url: "http://10.21.234.24:8080/api/sign/checkId",
+                    // url: "http://localhost:8080/api/sign/checkId",
+                    url: url2,
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    data: {
+                        "checkId": object["checkid"]
+                    },
+                    success: function (result) {
+                        console.log(result);
+                        var str = "";
+                        for (var x in result.data.data) {
+                            str += "<tr>" +
+                                " <td width='700' height='30' align='center' >" + result.data.data[x].nick + "</td>" +
+                                " <td width='700' height='30' align='center' >" + result.data.data[x].signTime + "</td>" +
+                                "</tr>";
+                        }
+                        $("#TBA1").html(str);
+                        var y = 0;
+                        var snumber = new Array(0, 0, 0, 0, 0, 0);
+                        for (var x in result.data.data) {
+                            var losttime = new Date(result.data.data[x].signTime);
+                            if (losttime.getTime() - starttime.getTime() >= ctime * (y + 1) / 6) {
+                                y++;
+                            }
+                            snumber[y]++;
+                        }
+                        var lujing = "<a href=" + object["setId"] + "checkin.html?setId=><button style='width: 100px;height: 50px;'>返回</button></a>"
+                        $("#sp1").html(lujing);
+
+                        var myChart = echarts.init(document.getElementById('main'));
+
+                        var option = {
+                            title: {
+                                text: '签到人数随时间变化图'
+                            },
+                            tooltip: {},
+                            legend: {
+                                data: [{
+                                    name: '人数'
+                                }]
+                            },
+                            xAxis: {
+                                data: [stime[0], stime[1], stime[2], stime[3], stime[4], stime[5]]
+                            },
+                            yAxis: {},
+                            series: [{
+                                name: '人数',
+                                type: 'line',
+                                data: [snumber[0], snumber[1], snumber[2], snumber[3], snumber[4], snumber[5]]
+                            }]
+                        };
+
+                        myChart.setOption(option);
+                    },
+                    error: function (e) {
+                        console.log(e)
+                    }
+                });
+            },
+            error: function (e) {
+                console.log(e)
+            }
+        });
+    });
+</script>
+<div class="div" style="min-width:800px;min-height:100px;" align="center">
+    <span id="sp1"></span>
+    <span>
+            <input id="sb1" type="submit" name="tz" style="width: 100px;height: 50px;" value="导出签到结果">
+        </span>
+</div>
+
+</body>
+
+</html>

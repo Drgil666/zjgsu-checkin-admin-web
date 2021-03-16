@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户信息管理界面</title>
+    <link rel="stylesheet" href="../css/c5.css">
+    <style>
+        input[type="text"] {
+            width: 150px;
+            height: 30px;
+        }
+    </style>
+    <style>
+        .one {
+            margin: 0 30px 0 0;
+        }
+    </style>
+    <style>
+        .div {
+            margin: 0 0 50px 0;
+        }
+    </style>
+    <style>
+        a {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+        }
+
+        a:hover {
+            text-decoration: none;
+            background-color: #ddd;
+            color: black;
+        }
+
+        .previous {
+            width: 5%;
+            height: 5%;
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .next {
+            width: 5%;
+            height: 5%;
+            background-color: #55b9ca;
+            color: white;
+        }
+
+        .round {
+            border-radius: 50%;
+        }
+    </style>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+
+
+<body>
+<div align="center" class="div">
+    <form name="search" id="search" method="get">
+        <span style="text-align: left;text-indent: 0.4em;"><label>用户昵称</label></span>
+        <span class="one"><input type="text" name="nick" class="textbox" style="border:1px #63c0eb solid;"></span>
+        <span style="text-align: left;text-indent: 0.4em;"><label>用户学院</label></span>
+        <span class="one"><input type="text" name="academy" class="textbox" style="border:1px #63c0eb solid;"></span>
+        <span style="text-align: left;text-indent: 0.4em;"><label>用户专业</label></span>
+        <span class="one"><input type="text" name="major" class="textbox" style="border:1px #63c0eb solid;"></span>
+        <span style="text-align: left;text-indent: 0.4em;"><label>排序方式</label></span>
+        <span class="one"><select type="select" name="pick" class="textbox"><option value="up">升序</option><option
+                value="down">降序</option></select></span>
+        <span class="one"><input type="button" id="check" name="find" class="submit" value="查询"
+                                 style='background-color:deepskyblue' onclick="searchpage(document.search);"></span>
+    </form>
+</div>
+<div class="div">
+    <table class="dataintable" id="ta" border="1px" align="center" cellpadding="1" cellspacing="0">
+        <tr>
+            <th width="700" height="30">用户序号</th>
+            <th width="700" height="30">用户名</th>
+            <th width="700" height="30">用户学号</th>
+            <th width="700" height="30">用户邮箱</th>
+            <th width="700" height="30">用户昵称</th>
+            <th width="700" height="30">用户学校</th>
+            <th width="700" height="30">用户学院</th>
+            <th width="700" height="30">用户专业</th>
+            <th width="700" height="30">查看信息</th>
+        </tr>
+        <tbody id="result"></tbody>
+    </table>
+</div>
+<!--显示分页信息-->
+<div class="div" align="center">
+    <form name="page" method="get" id="page">
+        <span><input type="button" class="previous round" value="上一页" onclick="previous();"></a></span>
+        <span>
+          <input type="text" name="current" id="current"
+                 style="width: 30px;height: 30px;color: brown; border-color: brown;">
+          <input type="button" name="tz" id="tz" value="跳转" style="width: 30px;height: 30px;color: brown;"
+                 onclick="pagetz(document.page);">
+      </span>
+        <span id="pageNum" style="text-align: right;text-indent: 0.4em;"><td>共[ ]页[ ]条记录</td></span>
+        <span><input type="button" class="next round" value="下一页" onclick="next();"></a></span>
+        <span style="text-align: right;text-indent: 0.4em;"><label>本页最多显示2条签到信息</label></span>
+    </form>
+</div>
+<div align="center">
+    <button style='width: 100px;height: 50px;' onclick="window.location.href='menu.html'">返回主菜单</button>
+</div>
+</body>
+<script>
+    function ajaxPost(nick, current, pagesize) {
+        $.ajax({
+            type: "get",
+            headers: {
+                "Token": token
+            },
+            url: URL,
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: {
+                "nick": nick,
+                "current": current,
+                "pageSize": pagesize,
+                "sorter": {"id": "ascend"}
+            },
+            success: function (result) {
+                console.log(result);
+                var str = "";
+                var kejian = "";
+                current = result.data.current;
+                lastpage = parseInt((result.data.total + pageSize - 1) / pageSize);
+                for (var x in result.data.data) {
+                    switch (result.data.data[x].visible) {
+                        case 0 :
+                            kejian = "不可见";
+                            break;
+                        case 1 :
+                            kejian = "可见";
+                            break;
+                        default:
+                    }
+                    str += "<tr>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].id + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].username + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].stuNo + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].mail + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].nick + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].school + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].academy + "</td>" +
+                        "<td  width='700' height='30' align='center'>" + result.data.data[x].major + "</td>" +
+                        "<td  width='700' height='30' align='center'><a href='user.html?userId=" + result.data.data[x].id + "'>查看</a></td>" +
+                        "</tr>";
+                }
+                $("#result").html(str);
+                $("#pageNum").html("共" + lastpage + "页" + result.data.total + "记录");
+            },
+            error: function (e) {
+                alert("查询失败");
+            }
+        });
+    }
+</script>
+<script>
+    var URL = "https://zjgsucheckin.top:8443/api/user/admin/list";
+    var NICK = "杨";
+    var token = localStorage.getItem("Token");
+    ajaxPost(NICK, 1, 2);
+</script>
+<script>
+    function pagetz(obj) {
+        var token = localStorage.getItem("Token");
+        current = obj.current.value;
+        ajaxPost(NICK, obj.current.value);
+    }
+</script>
+<script>
+    function next(obj) {
+        var token = localStorage.getItem("Token");
+        if (current != lastpage) {
+            current = current + 1;
+            ajaxPost(NICK, current, 2);
+        }
+    }
+</script>
+<script>
+    function previous(obj) {
+        var token = localStorage.getItem("Token");
+        if (current != firstspage) {
+            current = current - 1;
+            ajaxPost(NICK, current, 2);
+        }
+    }
+</script>
+<script>
+    var current = 1;
+    var lastpage = 1;
+    var firstspage = 1;
+    var pageSize = 2;//每页大小
+    function searchpage(obj) {
+        var token = localStorage.getItem("Token");
+        if (obj.nick.value != '') {
+            NICK=obj.nick.value;
+            ajaxPost(obj.nick.value, 1, 2);
+        }
+    }
+</script>
+</html>
